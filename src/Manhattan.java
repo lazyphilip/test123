@@ -9,21 +9,20 @@ import java.util.Queue;
 import java.util.Stack;
 
 
-public class MisplacedTile {
+public class Manhattan {
 	//h_n = number of misplaced tiles
 	//g_n = the depth
 	// f_n = h_n + g_n
-
-	public MisplacedTile(){
+	
+	public Manhattan(){
 		
 	}
 	
 	
 	@SuppressWarnings("unchecked")
-	public static void MisplacedTilePerform(Board gameboard){
-	
+	public static void performManHattan(Board gameboard){
+		
 	int openlist_maxsz = 0;
-	// creates a priority queue to store in all the possible moves of the board, no duplicates
 	PriorityQueue<Board> openlist = new PriorityQueue<Board>(10000,new Comparator<Board>(){
 
 		@Override
@@ -39,11 +38,14 @@ public class MisplacedTile {
 	openlist.add(gameboard);
 	while(true){
 		
-		Board curboard = openlist.poll();
-		
 		//2. Check current board if goal state
+
+		Board curboard = openlist.poll();
+		//System.out.println("Here is your current board");
+		//curboard.print_heuristic();
+		//curboard.printBoard();
+		
 		if( curboard.checkEqualsGoal()){
-			// creates a stack to display the trace to the goal state
 			Stack<Board> path = new Stack<Board>();
 			path.push(curboard);
 			curboard = curboard.getParent(curboard);
@@ -76,16 +78,17 @@ public class MisplacedTile {
 		ArrayList<Board> children = new ArrayList<>();
 		children = curboard.getchildren();
 		
-		// total number of nodes expanded
+		// total # of nodes expanded
 		int children_sz = children.size();
 		Board.setTotalNodesExpanded(children_sz);
 		
 		
+		
 		for ( int i =0; i < children.size(); i++){
-			//keep track of previous boards to trace to the goal state
 			children.get(i).setParent(curboard);
-			// calculates misplaced tiles for each board
-			children.get(i).calculateMisplacedTile();
+			children.get(i).calculateManDistance();
+			// keep track of previous boards
+			
 
 		}
 		
@@ -94,8 +97,14 @@ public class MisplacedTile {
 		//4. Move current board if not goal state to closed list
 		closedlist.add(curboard);
 		
+		//5. if any of the children appear in open/closed list remove them ? Check if less distance
 
-		// remove duplicates from openlist
+
+		//6. Calculate f(n) then Sort
+		// add children to open list
+		// current problem is that it adds in duplicates
+
+		//new
 		Iterator<Board> it = openlist.iterator();
 		while ( it.hasNext()){
 			Board tmp = it.next();
@@ -105,7 +114,7 @@ public class MisplacedTile {
 				}
 			}
 		}
-		//remove duplicates from closedlist
+//		//new
 		Iterator<Board> it2 = closedlist.iterator();
 		while ( it2.hasNext()){
 			Board tmp = it2.next();
@@ -115,16 +124,13 @@ public class MisplacedTile {
 				}
 			}
 		}
-		// add the children to openlist board into the priority queue
 		for ( int i =0; i < children.size(); ++i){
 			openlist.add(children.get(i));
 		}
-		
 		if ( openlist_maxsz < openlist.size()){
 			openlist_maxsz = openlist.size();
 		}
-		
-		
+
 
 	}
 		

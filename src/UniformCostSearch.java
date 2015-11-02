@@ -9,20 +9,18 @@ import java.util.Queue;
 import java.util.Stack;
 
 
-public class MisplacedTile {
-	//h_n = number of misplaced tiles
+public class UniformCostSearch {
 	//g_n = the depth
 	// f_n = h_n + g_n
-
-	public MisplacedTile(){
+	
+	public UniformCostSearch(){
 		
 	}
 	
-	
 	@SuppressWarnings("unchecked")
-	public static void MisplacedTilePerform(Board gameboard){
-	
-	int openlist_maxsz = 0;
+	public static void uniformCostSearchPerform(Board gameboard){
+		
+	int openlist_maxsz = 0;	
 	// creates a priority queue to store in all the possible moves of the board, no duplicates
 	PriorityQueue<Board> openlist = new PriorityQueue<Board>(10000,new Comparator<Board>(){
 
@@ -32,18 +30,20 @@ public class MisplacedTile {
 		}
 		
 	});
-	
+	//List of boards that have been visited
 	ArrayList<Board> closedlist = new ArrayList<>();
 	
 	//1. Add the originial board to open list
 	openlist.add(gameboard);
 	while(true){
 		
+		
+		//pop open the first board on openlist assign it as current board you are on
 		Board curboard = openlist.poll();
 		
-		//2. Check current board if goal state
+		//check to see if goal state
 		if( curboard.checkEqualsGoal()){
-			// creates a stack to display the trace to the goal state
+			//if you are then trace back the steps from original board to the goal board
 			Stack<Board> path = new Stack<Board>();
 			path.push(curboard);
 			curboard = curboard.getParent(curboard);
@@ -64,7 +64,6 @@ public class MisplacedTile {
 				curboard.printBoard();
 				System.out.println("\n");
 			}
-			
 			System.out.println("You have reached the goal state!");
 			System.out.println("Total number of nodes expanded: "+ Board.getTotalNodesExpanded());
 			System.out.println("Max size in the queue:" + openlist_maxsz);
@@ -76,26 +75,19 @@ public class MisplacedTile {
 		ArrayList<Board> children = new ArrayList<>();
 		children = curboard.getchildren();
 		
-		// total number of nodes expanded
-		int children_sz = children.size();
-		Board.setTotalNodesExpanded(children_sz);
-		
 		
 		for ( int i =0; i < children.size(); i++){
-			//keep track of previous boards to trace to the goal state
 			children.get(i).setParent(curboard);
-			// calculates misplaced tiles for each board
-			children.get(i).calculateMisplacedTile();
+			children.get(i).calculateUniformCost();
+			
 
 		}
-		
 		
 		
 		//4. Move current board if not goal state to closed list
 		closedlist.add(curboard);
 		
-
-		// remove duplicates from openlist
+		//remove any duplicates from openlist and closed list
 		Iterator<Board> it = openlist.iterator();
 		while ( it.hasNext()){
 			Board tmp = it.next();
@@ -105,7 +97,6 @@ public class MisplacedTile {
 				}
 			}
 		}
-		//remove duplicates from closedlist
 		Iterator<Board> it2 = closedlist.iterator();
 		while ( it2.hasNext()){
 			Board tmp = it2.next();
@@ -115,16 +106,13 @@ public class MisplacedTile {
 				}
 			}
 		}
-		// add the children to openlist board into the priority queue
+		//add all the possible moves to openlist 
 		for ( int i =0; i < children.size(); ++i){
 			openlist.add(children.get(i));
 		}
-		
 		if ( openlist_maxsz < openlist.size()){
 			openlist_maxsz = openlist.size();
 		}
-		
-		
 
 	}
 		
